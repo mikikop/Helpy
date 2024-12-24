@@ -1,0 +1,39 @@
+﻿agency_id,agency_name,agency_english_name
+2,רכבת ישראל,Israel Railways
+3,אגד,Egged
+4,אלקטרה אפיקים תחבורה,Electra Afikim Transportation
+5,דן,Dan
+6,ש.א.מ,S.A.M
+7,נסיעות ותיירות,Travel and Tourism
+8,גי.בי.טורס,GB Tours
+10,מועצה אזורית אילות,Eilot Regional Council
+14,נתיב אקספרס,Nativ Express
+15,מטרופולין,Metropoline
+16,סופרבוס,Superbus
+18,קווים,Kavim
+20,כרמלית,Carmelit
+21,כפיר,Kfir
+22,תבל,Tevel
+23,גלים,Galim
+24,מועצה אזורית גולן,Golan Regional Council
+25,אלקטרה אפיקים,Electra Afikim
+31,דן בדרום,Dan Badarom
+32,דן באר שבע,Dan Beer Sheva
+33,כבל אקספרס,Cable Express
+34,תנופה,Tnufa
+35,בית שמש אקספרס,Beit Shemesh Express
+37,אקסטרה,Extra
+38,אקסטרה ירושלים,Extra Jerusalem
+40,יונייטד טורס,United Tours
+42,ירושלים-רמאללה איחוד,Jerusalem Ramallah Buses
+44,ירושלים-אבו-תור-ענאתא איחוד,Jerusalem Anata Buses
+45,ירושלים-אלווסט איחוד,Jerusalem Elvost Buses
+47,ירושלים-הר הזיתים, Jerusalem Olives Mount Buses
+49,ירושלים - עיסאוויה מחנה שעפאט איחוד,Jerusalem Shufat Buses
+50,ירושלים-דרום איחוד,Jerusalem-South Buses
+51,ירושלים-צור באהר איחוד,Sur Baher Jerusalem Buses
+91,מוניות מטרו קו,Metro Kav Taxis
+93,מוניות מאיה יצחק שדה,Maya Isaac Sadeh Taxis
+97,אודליה מוניות בעמ,Odelia Taxis
+98,מוניות רב קווית 4-5,Multi-Line Taxis 4-5
+135,דרך אגד עוטף ירושלים,Egged Way Jerusalem Envelope

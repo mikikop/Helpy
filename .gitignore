@@ -3,6 +3,10 @@
 __pycache__/
 *.so
 
+# Environment Variables
+.env
+.config
+
 # Virtual environments
 .venv/
 env/
@@ -26,6 +30,7 @@ Thumbs.db
 *.log
 *.sqlite3
 *.db
+indexes.sqlite
 
 # Django-related
 # Django migration files (keep migrations if needed for versioning)
@@ -65,4 +70,8 @@ db.sqlite3
 
 # Git-related
 *.orig
-*.rej
+*.rej.qodo
+app/data/stop_times.txt
+app/data/stops.txt
+app/data/trips.txt
+app/data/routes.txt

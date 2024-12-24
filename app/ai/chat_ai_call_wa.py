@@ -78,11 +78,11 @@ async def chat_with_ai(user_message: str, messages: list = None):
         "it": ["esci", "uscita", "arrivederci"]
     }
     exit_messages = {
-        "en": "Thank you for using HelpAI. Goodbye!",
-        "he": "תודה שהשתמשת בהלפיי. להתראות!",
-        "fr": "Merci d'avoir utilisé HelpAI. Au revoir !",
-        "es": "Gracias por usar HelpAI. ¡Adiós!",
-        "it": "Grazie per aver utilizzato HelpAI. Arrivederci!"
+        "en": "Thank you for using Helpy. Goodbye!",
+        "he": "תודה שהשתמשת בהלפי. להתראות!",
+        "fr": "Merci d'avoir utilisé Helpy. Au revoir !",
+        "es": "Gracias por usar Helpy. ¡Adiós!",
+        "it": "Grazie per aver utilizzato Helpy. Arrivederci!"
     }
 
     try:
@@ -111,7 +111,7 @@ async def chat_with_ai(user_message: str, messages: list = None):
             messages.append(
                 {
                     "role": "system",
-                    "content": "You are HelpAI, a transit assistant. When retrieving transit times:"
+                    "content": "You are Helpy, a transit assistant. When retrieving transit times:"
                                "1. Always start by collecting the stop code. If the users enters letters, ask for numbers."
                                "2. Then, ask for the line number. Don't say you will check the ETA, just deliver it."
                                "3. Manage the follow-up conversation. If the user enters a number you don't understand "
@@ -124,11 +124,11 @@ async def chat_with_ai(user_message: str, messages: list = None):
 
             # Define the initial message in multiple languages
             initial_messages = {
-                "en": "Hello! I’m HelpAI, your assistant! I’ll let you know how long it will take for your next bus/train to arrive. To do this, I need you to tell me the station number where you are (it’s written on the sign at the top of the stop). Thank you!",
-                "he": "שלום! אני הלפיי, העוזר שלך! אני אגיד לך כמה זמן ייקח עד להגעת התחבורה הבאה שלך. כדי לעשות זאת, אני צריך שתאמר לי את מספר התחנה (המספר כתוב בשלט בראש התחנה). תודה!",
-                "fr": "Bonjour! Je suis HelpAI, votre assistant! Je vais vous indiquer combien de temps il reste avant l'arrivée de votre prochain bus/train. Pour cela, j'ai besoin du numéro de l'arrêt où vous vous trouvez (il est écrit sur le panneau en haut de l'arrêt). Merci!",
-                "es": "¡Hola! Soy HelpAI, tu asistente. Te diré cuánto tiempo tomará para que llegue tu próximo autobús/tren. Para esto, necesito que me digas el número de estación donde estás (está escrito en el letrero en la parte superior de la parada). ¡Gracias!",
-                "it": "Ciao! Sono HelpAI, il tuo assistente! Ti dirò quanto tempo ci vorrà prima che arrivi il tuo prossimo autobus/treno. Per farlo, ho bisogno che mi dici il numero della stazione in cui ti trovi (è scritto sul cartello in cima alla fermata). Grazie!"
+                "en": "Hello! I’m Helpy, your assistant! I’ll let you know how long it will take for your next bus/train to arrive. To do this, I need you to tell me the station number where you are (it’s written on the sign at the top of the stop). Thank you!",
+                "he": "שלום! אני הלפי, העוזר שלך! אני אגיד לך כמה זמן ייקח עד להגעת התחבורה הבאה שלך. כדי לעשות זאת, אני צריך שתאמר לי את מספר התחנה (המספר כתוב בשלט בראש התחנה). תודה!",
+                "fr": "Bonjour! Je suis Helpy, votre assistant! Je vais vous indiquer combien de temps il reste avant l'arrivée de votre prochain bus/train. Pour cela, j'ai besoin du numéro de l'arrêt où vous vous trouvez (il est écrit sur le panneau en haut de l'arrêt). Merci!",
+                "es": "¡Hola! Soy Helpy, tu asistente. Te diré cuánto tiempo tomará para que llegue tu próximo autobús/tren. Para esto, necesito que me digas el número de estación donde estás (está escrito en el letrero en la parte superior de la parada). ¡Gracias!",
+                "it": "Ciao! Sono Helpy, il tuo assistente! Ti dirò quanto tempo ci vorrà prima che arrivi il tuo prossimo autobus/treno. Per farlo, ho bisogno che mi dici il numero della stazione in cui ti trovi (è scritto sul cartello in cima alla fermata). Grazie!"
             }
 
             # Use the detected language or fall back to English

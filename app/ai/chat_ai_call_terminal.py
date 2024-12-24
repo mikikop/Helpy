@@ -125,7 +125,7 @@ async def chat_with_ai():
 
     # messages = [{
     #     "role": "system",
-    #     "content": "You are HelpAI, a transit assistant. When retrieving transit times:"
+    #     "content": "You are Helpy, a transit assistant. When retrieving transit times:"
     #                "1. Always start by collecting the stop code. If the users enters letters, ask for numbers."
     #                "2. Then, ask for the line number. Don't say you will check the ETA, just deliver it."
     #                "3. Manage the follow-up conversation. If the user enters a number you don't understand "
@@ -136,7 +136,7 @@ async def chat_with_ai():
 
     messages = [{
         "role": "system",
-        "content": "You are HelpAI, a transit assistant. When retrieving transit times:"
+        "content": "You are Helpy, a transit assistant. When retrieving transit times:"
                    "1. Always start by collecting the stop code. If the users enters letters, ask for numbers."
                    "2. When you get a stop number, ASK for the line number before making any function calls."
                    "3. Only after having BOTH stop number and line number, use get_transit_times."

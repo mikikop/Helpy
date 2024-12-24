@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "transp"
+version = "0.1.0"
+description = "[A FastAPI project AI based to create a voice and whatsapp agent in the transportation domain]"
+authors = ["mikikop <39693826+mikikop@users.noreply.github.com>"]
+license = "MIT"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# Core FastAPI and related dependencies
+fastapi = "^0.115.5"
+uvicorn = "^0.32.1"
+pydantic = "^2.10.1"
+starlette = "^0.41.3"
+pandas = "^2.0.0"
+
+# Async HTTP client for external API queries
+httpx = "^0.27.2"
+
+# Database and ORM
+sqlalchemy = "^2.0.0"
+databases = {git = "https://github.com/encode/databases", branch = "master"}
+asyncpg = "^0.30.0"
+
+# Speech-to-Text and Text-to-Speech
+google-cloud-speech = "^2.19.0"
+google-cloud-texttospeech = "^2.17.0"
+
+# WhatsApp integration
+twilio = "^9.3.7"
+
+# Language detection and translation
+langdetect = "^1.0.9"
+google-cloud-translate = "^3.11.0"
+
+# Environment variable management
+python-dotenv = "^1.0.0"
+
+# Task queue for background processing
+celery = "^5.3.0"
+redis = "^5.2.0"
+
+# Optional: Local AI model support (e.g., OpenAI Whisper, LangChain)
+#openai-whisper = "^2024.4.1"
+langchain = "^0.2.1"
+langchain-openai = "^0.1.8"
+chromadb = "^0.4.1"
+neo4j = "^5.8.0"
+gtfslib = "^1.0.0"
+openai = "^1.56.2"
+jsonschema = "^4.23.0"
+ipdb = "^0.13.13"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"  # Testing
+pytest-asyncio = "^0.21.0"  # Async testing
+black = "^23.9.1"  # Code formatting
+isort = "^5.12.0"  # Import sorting
+mypy = "^1.6.0"  # Type checking
+python-dotenv = "^1.0.1"  # Typing support for python-dotenv
+
+[tool.poetry.scripts]
+start-uvicorn = "uvicorn:main:app --reload"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

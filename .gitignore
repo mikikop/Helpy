@@ -1,0 +1,68 @@
+# Python-related
+*.py[cod]
+__pycache__/
+*.so
+
+# Virtual environments
+.venv/
+env/
+ENV/
+venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Poetry files
+poetry.lock
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Django-related
+# Django migration files (keep migrations if needed for versioning)
+*.pyc
+
+# Local settings (such as secret keys and local configuration)
+local_settings.py
+settings_local.py
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Media and static files
+/media/
+/static/
+
+# Django secret key file (optional, if used)
+.secret_key
+
+# Tests
+.coverage
+.tox/
+
+# Git-related
+*.orig
+*.rej

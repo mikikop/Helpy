@@ -123,17 +123,6 @@ async def chat_with_ai():
     timeout_seconds = 30
     functions = [get_transit_times_function(), get_lines_at_stop_function()]
 
-    # messages = [{
-    #     "role": "system",
-    #     "content": "You are Helpy, a transit assistant. When retrieving transit times:"
-    #                "1. Always start by collecting the stop code. If the users enters letters, ask for numbers."
-    #                "2. Then, ask for the line number. Don't say you will check the ETA, just deliver it."
-    #                "3. Manage the follow-up conversation. If the user enters a number you don't understand "
-    #                "ask him if it's a stop number or a line number. Confirm."
-    #                "4. ONLY ask for the agency if multiple lines with the same number exist at the stop."
-    #                "5. Do not request unnecessary information."
-    # }]
-
     messages = [{
         "role": "system",
         "content": "You are Helpy, a transit assistant. When retrieving transit times:"

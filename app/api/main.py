@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 import httpx
 from app.ai.chat_ai_call_wa import chat_with_ai
-import os
+from app.utils.messaging import send_whatsapp_message
 
 app = FastAPI()
 
@@ -35,7 +35,7 @@ async def whatsapp_webhook(request: Request):
 
             # Interact with the AI
             if user_message:
-                ai_response = await chat_with_ai(user_message, messages=conversation_history[user_id])
+                ai_response = await chat_with_ai(user_message, user_id, messages=conversation_history[user_id])
                 # Save the updated conversation history
                 conversation_history[user_id] = ai_response  # This includes the entire chat so far
                 # Send the response back to the user via WHAPI
@@ -57,24 +57,4 @@ async def whatsapp_webhook(request: Request):
         return {"status": "error", "reason": str(e)}
 
 
-async def send_whatsapp_message(client: httpx.AsyncClient, recipient_id: str, message: str):
-    """
-    Send a message via WHAPI to the recipient.
-    """
-    WHAPI_CHANNEL_TOKEN = os.getenv('WHAPI_CHANNEL_TOKEN')
-    WHAPI_SEND_URL = os.getenv('WHAPI_URL') + "messages/text"
 
-    payload = {
-        "typing_time": 0,
-        "to": recipient_id + "@s.whatsapp.net",
-        "body": message
-    }
-    headers = {
-        "accept": "application/json",
-        "Authorization": f"Bearer {WHAPI_CHANNEL_TOKEN}",
-        "Content-Type": "application/json",
-    }
-    response = await client.post(WHAPI_SEND_URL, json=payload, headers=headers)
-
-    # Raise an error if the response fails
-    response.raise_for_status()

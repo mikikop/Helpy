@@ -11,7 +11,7 @@ python = "^3.11"
 
 # Core FastAPI and related dependencies
 fastapi = "^0.115.5"
-uvicorn = "^0.32.1"
+uvicorn = "^0.34.0"
 pydantic = "^2.10.1"
 starlette = "^0.41.3"
 pandas = "^2.0.0"
@@ -52,6 +52,9 @@ gtfslib = "^1.0.0"
 openai = "^1.56.2"
 jsonschema = "^4.23.0"
 ipdb = "^0.13.13"
+langid = "^1.1.6"
+mediapipe = "^0.10.20"
+fasttext = "^0.9.3"
 
 
 [tool.poetry.group.dev.dependencies]

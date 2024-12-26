@@ -3,13 +3,18 @@ import csv
 import json
 import os
 from datetime import datetime
-from langdetect import detect
+from fastapi import HTTPException
+import fasttext
 import pandas as pd
 import httpx
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
+
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,10 +22,12 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 # Construct path to agency_simple.txt in the data directory
 agency_file_path = os.path.join(parent_dir, 'data', 'agency_simple.txt')
+# Construct path to lid.176.bin in the models directory
+language_file_path = os.path.join(parent_dir, 'models', 'lid.176.bin')
 
 
 async def get_transit_times(stop_number: str, line_number: str, operator_id: str = None,
-                                  detected_language: str = None):
+                            detected_language: str = None):
     """
     Async function to process transit requests using utils functions.
 
@@ -71,6 +78,8 @@ async def get_transit_times(stop_number: str, line_number: str, operator_id: str
                     "he": "לא נמצאו מפעילים עבור הקו הזה בתחנה הזו.",
                     "es": "No se encontraron operadores para esta línea en esta parada.",
                     "it": "Nessun operatore trovato per questa linea a questa fermata.",
+                    "ar": "لم يتم العثور على مشغلين لهذا الخط في هذه المحطة",
+                    "ru": "Операторы для этого маршрута на этой остановке не найдены"
                 }.get(detected_language, "No operators found for this line at this stop")
                 return {
                     'success': False,
@@ -123,14 +132,14 @@ async def get_times(current_stop_code: str, time_interval: str = "PT1H"):
         return response.json()
 
 
-def filter_json(resp_json: json, stop_code: str, agency: str, publishedLine: str):
+def filter_json(resp_json: json, stop_code: str, agency: str, published_line: str):
     results = []
     monitored_stop_visit = resp_json["Siri"]["ServiceDelivery"]["StopMonitoringDelivery"][0]["MonitoredStopVisit"]
 
     for element in monitored_stop_visit:
         # Check if all filter conditions are met
         if (element.get("MonitoringRef") == stop_code and
-                element.get("MonitoredVehicleJourney", {}).get("PublishedLineName") == publishedLine and
+                element.get("MonitoredVehicleJourney", {}).get("PublishedLineName") == published_line and
                 element.get("MonitoredVehicleJourney", {}).get("OperatorRef") == agency):
             # Extract relevant information
             vehicle_journey = element["MonitoredVehicleJourney"]
@@ -149,14 +158,14 @@ def filter_json(resp_json: json, stop_code: str, agency: str, publishedLine: str
     return results
 
 
-async def multiple_operators_at_line(resp_json: json, stop_code: str, publishedLine: str) -> list:
+async def multiple_operators_at_line(resp_json: json, stop_code: str, published_line: str) -> list:
     results = set()
     monitored_stop_visit = resp_json["Siri"]["ServiceDelivery"]["StopMonitoringDelivery"][0]["MonitoredStopVisit"]
 
     for element in monitored_stop_visit:
         # Check if all filter conditions are met
         if (element.get("MonitoringRef") == stop_code and
-                element.get("MonitoredVehicleJourney", {}).get("PublishedLineName") == publishedLine):
+                element.get("MonitoredVehicleJourney", {}).get("PublishedLineName") == published_line):
             results.add((element["MonitoredVehicleJourney"].get("PublishedLineName"),
                          element["MonitoredVehicleJourney"].get("OperatorRef")))
     return list(results)
@@ -206,46 +215,86 @@ async def get_user_input(prompt, timeout):
         return None
 
 
-# Language detection function
-def detect_language(text):
+def detect_language(text_to_detect: str):
+    # Download a pre-trained language identification model
+    model_path = language_file_path
+    model = fasttext.load_model(model_path)
+
     try:
-        # Only detect language if the input has valid content
-        if not text.strip():
-            return None  # Return None for empty input, which avoids detecting language
-        language = detect(text)
-        return language
+        detection = model.predict(text_to_detect)
+        language = detection[0][0]  # The language code
+        probability = detection[1][0]  # The probability score
+        print(f"Language: {language}, Probability: {probability}")
+        detected_language = language.split("__")[-1]
+        return detected_language
     except Exception as e:
-        # print(f"Language detection error: {e}")
+        print(f"Language detection error: {e}")
         return "en"  # Default to English if detection fails
 
 
 async def get_lines_at_stop(stop_number: str):
+    try:
 
-    # Load GTFS files
-    stops = pd.read_csv(os.path.join(parent_dir, 'data', 'stops.txt'))
-    stop_times = pd.read_csv(os.path.join(parent_dir, 'data', 'stop_times.txt'))
-    trips = pd.read_csv(os.path.join(parent_dir, 'data', 'trips.txt'))
-    routes = pd.read_csv(os.path.join(parent_dir, 'data', 'routes.txt'))
+        # Load GTFS files
+        stops_path = os.path.join(parent_dir, 'data', 'stops.txt')
+        stop_times_path = os.path.join(parent_dir, 'data', 'stop_times.txt')
+        trips_path = os.path.join(parent_dir, 'data', 'trips.txt')
+        routes_path = os.path.join(parent_dir, 'data', 'routes.txt')
 
-    # Clean up potential whitespace issues
-    stops["stop_code"] = stops["stop_code"].astype(str).str.strip()
+        # Ensure files exist
+        for file_path in [stops_path, stop_times_path, trips_path, routes_path]:
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"Missing required file: {file_path}")
 
-    # Step 1: Find the stop_id associated with the stop_number
-    stop_id = int(stops[stops["stop_code"] == stop_number]["stop_id"].unique()[0])
-    # print(f"Stop_id at stop number {stop_number}: {stop_id}")
+        # Load CSV files
+        stops = pd.read_csv(stops_path)
+        stop_times = pd.read_csv(stop_times_path)
+        trips = pd.read_csv(trips_path)
+        routes = pd.read_csv(routes_path)
 
-    # Step 2: Find trip_ids associated with the stop_id
-    trip_ids = stop_times[stop_times["stop_id"] == int(stop_id)]["trip_id"]
-    # print(f"Trips at stop {stop_number}: {trip_ids}")
+        # Clean up potential whitespace issues
+        stops["stop_code"] = stops["stop_code"].astype(str).str.strip()
 
-    # Step 3: Map trip_ids to route_ids
-    route_ids = trips[trips["trip_id"].isin(trip_ids)]["route_id"].unique()
-    # print(f"Routes serving stop {stop_number}: {route_ids}")
+        # Step 1: Find the stop_id associated with the stop_number
+        stop_id_series = stops[stops["stop_code"] == stop_number]["stop_id"].unique()
+        if len(stop_id_series) == 0:
+            raise ValueError(f"No stop_id found for stop_number: {stop_number}")
+        stop_id = int(stop_id_series[0])
 
-    # Step 4: Get route details
-    lines = routes[routes["route_id"].isin(route_ids)][["route_id", "route_short_name", "route_long_name"]].drop_duplicates(subset=["route_short_name"])
-    # Convert route_short_name to a list
-    route_short_name_list = lines["route_short_name"].tolist()
-    # print(f"Lines at stop {stop_number}:\n{route_short_name_list}")
+        # Step 2: Find trip_ids associated with the stop_id
+        trip_ids = stop_times[stop_times["stop_id"] == stop_id]["trip_id"]
+        if trip_ids.empty:
+            raise ValueError(f"No trips found for stop_id: {stop_id}")
 
-    return route_short_name_list
+        # Step 3: Map trip_ids to route_ids
+        route_ids = trips[trips["trip_id"].isin(trip_ids)]["route_id"].unique()
+        if len(route_ids) == 0:
+            raise ValueError(f"No routes found for trips at stop_id: {stop_id}")
+
+        # Step 4: Get route details
+        lines = routes[routes["route_id"].isin(route_ids)][
+            ["route_id", "route_short_name", "route_long_name"]].drop_duplicates(subset=["route_short_name"])
+        route_short_name_list = lines["route_short_name"].tolist()
+
+        # If no lines are found
+        if not route_short_name_list:
+            raise ValueError(f"No lines found for stop_number: {stop_number}")
+
+        print("RSSSSS", route_short_name_list)
+
+        # Return the successful response
+        return {
+            "success": True,
+            "stop_number": stop_number,
+            "lines_list": route_short_name_list
+        }
+
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=f"File error: {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=f"Data error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
+

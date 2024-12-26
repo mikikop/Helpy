@@ -43,6 +43,8 @@ buses stopping there.
 - The URL to download the GTFS files (I pushed only the agency_simple.txt file that is a 
 simplified version of the agency.txt - but you'll need to download in the same folder routes.txt, 
 stop_times.txt, stops.txt and trips.txt)
+- For the language detection I used fasttext (https://fasttext.cc/docs/en/language-identification.html)
+You need to download the model lid.176.bin.
 
 ## Installation
 
@@ -115,3 +117,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For questions or support, please open an issue in this repository.
+
+### References
+For using Fasttext:
+1. Joulin, A., Grave, E., Bojanowski, P., & Mikolov, T. (2016). *Bag of Tricks for Efficient Text Classification*. arXiv preprint arXiv:1607.01759.
+   - [Link to the paper](https://arxiv.org/abs/1607.01759)
+2. Joulin, A., Grave, E., Bojanowski, P., Douze, M., Jégou, H., & Mikolov, T. (2016). *FastText.zip: Compressing text classification models*. arXiv preprint arXiv:1612.03651.
+   - [Link to the paper](https://arxiv.org/abs/1612.03651)
+

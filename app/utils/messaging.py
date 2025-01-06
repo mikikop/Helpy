@@ -52,7 +52,7 @@ async def send_whatsapp_message(client: httpx.AsyncClient, recipient_id: str, me
 
     payload = {
         "typing_time": 0,
-        "to": recipient_id + "@s.whatsapp.net",
+        "to": recipient_id,
         "body": message
     }
     headers = {

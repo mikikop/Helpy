@@ -52,9 +52,9 @@ gtfslib = "^1.0.0"
 openai = "^1.56.2"
 jsonschema = "^4.23.0"
 ipdb = "^0.13.13"
-langid = "^1.1.6"
-mediapipe = "^0.10.20"
 fasttext = "^0.9.3"
+aiohttp = "^3.11.11"
+protobuf = "^5.29.2"
 
 
 [tool.poetry.group.dev.dependencies]

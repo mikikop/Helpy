@@ -4,7 +4,8 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from openai import OpenAI
-from ..utils.utils import (get_transit_times, operatorId_to_name, get_user_input, detect_language, get_lines_at_stop)
+from ..utils.utils import (get_transit_times, operatorId_to_name, get_user_input, detect_language, get_lines_at_stop,
+                           fetch_and_decode_alerts, filter_alerts)
 from ..utils.schema import (get_transit_times_function, get_lines_at_stop_function)
 from langdetect import detect, DetectorFactory
 
@@ -186,6 +187,16 @@ async def chat_with_ai():
                             operator_id=function_args.get("agency"),
                             detected_language=current_language
                         )
+                        # print("RESULT. ", result)
+                        if result:
+                            # Await the fetch_and_decode_alerts coroutine to get the result
+                            alerts = await fetch_and_decode_alerts()
+                            if alerts is not None:
+                                # Pass the result to filter_alerts
+                                changes = await filter_alerts(alerts, result["line_number"])
+                                if changes:
+                                    print("CHANGES_HEAD_HE", f"{changes[0]['Header_text_he']}")
+                                    print("CHANGES_DESCR_HE", f"{changes[0]['Description_text_he']}")
                     elif function_name == "get_lines_at_stop":
                         stop_number = function_args["stop_number"]  # Ensure this is a dictionary
                         result = await get_lines_at_stop(stop_number)
@@ -215,6 +226,19 @@ async def chat_with_ai():
         except Exception as e:
             print(f"Error: {e}")
 
+# async def main():
+#     # Await the fetch_and_decode_alerts coroutine to get the result
+#     alerts = await fetch_and_decode_alerts()
+#     if alerts is not None:
+#         # Pass the result to filter_alerts
+#         toto =await filter_alerts(alerts, "10888")
+#         if toto:
+#             print("YESH")
+#         else:
+#             print("NOOOO")
+
 
 if __name__ == "__main__":
     asyncio.run(chat_with_ai())
+    # asyncio.run(fetch_and_decode_alerts())
+    # asyncio.run(main())

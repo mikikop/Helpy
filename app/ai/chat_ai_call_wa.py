@@ -9,7 +9,8 @@ from openai import OpenAI
 from app.utils.messaging import send_wait_message
 from app.utils.schema import get_transit_times_function, get_lines_at_stop_function, validate_transit_times
 
-from app.utils.utils import (get_transit_times, operatorId_to_name, get_lines_at_stop, detect_language)
+from app.utils.utils import (get_transit_times, operatorId_to_name, get_lines_at_stop, detect_language,
+                             fetch_and_decode_alerts, filter_alerts)
 
 # Load environment variables
 load_dotenv()
@@ -255,6 +256,17 @@ async def chat_with_ai(user_message: str, user_id: str, messages: list = None):
                         logger.info(f"get_transit_times response: {result}")
                         logger.info(f"chat_with_ai.detected_language: {chat_with_ai.detected_language}")
                         if result.get('success'):
+                            # Await the fetch_and_decode_alerts coroutine to get the result
+                            alerts = await fetch_and_decode_alerts()
+                            reply_msg = ""
+                            if alerts is not None:
+                                # Pass the result to filter_alerts
+                                changes = await filter_alerts(alerts, result["line_number"])
+                                if changes:
+                                    reply_msg = (f"{changes[0]['Header_text_he'].strip()}\n"
+                                                 f"{changes[0]['Description_text_he'].strip()}")
+                                    messages.append({"role": "assistant", "content": f"WARNING for line {result['line_number']}"
+                                                                                     f":\n {reply_msg}"})
                             reply_message = await process_successful_result(result, chat_with_ai.detected_language)
                             messages.append({"role": "assistant", "content": reply_message})
                         else:

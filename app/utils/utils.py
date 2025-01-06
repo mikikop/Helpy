@@ -3,12 +3,17 @@ import csv
 import json
 import os
 from datetime import datetime
-from fastapi import HTTPException
+
+import aiohttp
 import fasttext
-import pandas as pd
 import httpx
+import pandas as pd
 from dotenv import load_dotenv
+from fastapi import HTTPException
+from google.protobuf.message import DecodeError
 from openai import OpenAI
+
+from app.utils import gtfs_realtime_pb2
 
 # Load environment variables
 load_dotenv()
@@ -88,10 +93,12 @@ async def get_transit_times(stop_number: str, line_number: str, operator_id: str
 
         # If operator_id is available, proceed with filtering and ETA calculation
         filtered_times = filter_json(times_response, stop_number, operator_id, line_number)
+        lineRef = [x.get("LineRef") for x in filtered_times]
         etas = get_eta(filtered_times)
 
         return {
             "success": True,
+            "lineRef": lineRef[0],
             "stop_number": stop_number,
             "line_number": line_number,
             "agency": operator_id,
@@ -297,4 +304,116 @@ async def get_lines_at_stop(stop_number: str):
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+# Processing the Special messages for developers in case of changes in routes
+async def fetch_and_decode_alerts():
+    """
+    Fetch and decode GTFS-Realtime Service Alerts from MOT API
+    """
+    sm_url = os.getenv("SM_URL")
+    params = {
+        "Key": os.getenv("API_KEY"),
+    }
 
+    async with aiohttp.ClientSession() as session:
+        async with session.get(sm_url, params=params) as response:
+            if response.status == 200:
+                # Read the binary content
+                binary_data = await response.read()
+
+                try:
+                    # Create a FeedMessage object
+                    feed = gtfs_realtime_pb2.FeedMessage()
+                    # Parse the binary data
+                    feed.ParseFromString(binary_data)
+
+                    # Convert to dictionary for easier handling
+                    alerts = []
+                    for entity in feed.entity:
+                        if entity.HasField('alert'):
+                            alert_dict = {
+                                'id': entity.id,
+                                'alert': {
+                                    'active_period': [{
+                                        'start': period.start,
+                                        'end': period.end
+                                    } for period in entity.alert.active_period],
+                                    'informed_entity': [{
+                                        'agency_id': e.agency_id if e.HasField('agency_id') else None,
+                                        'route_id': e.route_id if e.HasField('route_id') else None,
+                                        'stop_id': e.stop_id if e.HasField('stop_id') else None,
+                                        'trip': {
+                                            'trip_id': e.trip.trip_id,
+                                            'route_id': e.trip.route_id,
+                                            'schedule_relationship': e.trip.schedule_relationship
+                                        } if e.HasField('trip') else None
+                                    } for e in entity.alert.informed_entity],
+                                    'cause': entity.alert.cause,
+                                    'effect': entity.alert.effect,
+                                    'header_text': {
+                                        lang: translation.text
+                                        for translation in entity.alert.header_text.translation
+                                        for lang in [translation.language]
+                                    },
+                                    'description_text': {
+                                        lang: translation.text
+                                        for translation in entity.alert.description_text.translation
+                                        for lang in [translation.language]
+                                    }
+                                }
+                            }
+                            alerts.append(alert_dict)
+                    # print("ALERT ", alerts)
+                    return alerts
+
+                except DecodeError as e:
+                    print(f"Failed to decode protobuf: {e}")
+                    return None
+            else:
+                print(f"Request failed with status {response.status}")
+                return None
+
+
+async def filter_alerts(resp_list: list, lineRef: str):
+    """
+    Filter alerts based on the given line reference number.
+
+    Args:
+        resp_list (list): List of alert response dictionaries
+        lineRef (str): Route ID to filter by
+
+    Returns:
+        list: Filtered list of alerts with relevant text information
+    """
+    results = []
+
+    # Process each response in the list
+    for resp in resp_list:
+        # Get the alert dictionary from the response
+        alert = resp.get("alert")
+        if not alert:
+            continue
+
+        # Check if any informed entity matches our line reference
+        informed_entities = alert.get("informed_entity", [])
+        matching_entities = any(
+            entity.get("route_id") == lineRef
+            for entity in informed_entities
+        )
+
+        if matching_entities:
+            # Create the result dictionary with Hebrew texts
+            result = {
+                "Header_text_he": alert["header_text"]["he"],
+                "Description_text_he": alert["description_text"]["he"]
+            }
+
+            # Add non-empty English and Arabic texts if they exist
+            for language in ["en", "ar"]:
+                if alert["header_text"][language]:
+                    result[f"Header_text_{language}"] = alert["header_text"][language]
+                if alert["description_text"][language]:
+                    result[f"Description_text_{language}"] = alert["description_text"][language]
+
+            results.append(result)
+    print("changes ", results)
+    return results

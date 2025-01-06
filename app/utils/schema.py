@@ -127,28 +127,3 @@ def validate_lines_at_stop(inputs):
 
     # Return sanitized inputs
     return {"stop_number": stop_number.strip()}
-
-
-# def handle_function_call(function_name, inputs):
-#     """
-#     Handles the function call and routes to the correct backend implementation.
-#
-#     Args:
-#     - function_name (str): Name of the function to call.
-#     - inputs (dict): Inputs for the function.
-#
-#     Returns:
-#     - The response from the called function.
-#     """
-#     if function_name == "get_lines_at_stop":
-#         # Validate inputs
-#         validated_inputs = validate_lines_at_stop(inputs)
-#         return get_lines_at_stop(**validated_inputs)
-#
-#     elif function_name == "get_times":
-#         # Validate inputs for get_times
-#         validated_inputs = validate_transit_times(inputs)
-#         return get_transit_times(**validated_inputs)
-#
-#     else:
-#         raise ValueError(f"Unknown function: {function_name}")

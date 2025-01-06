@@ -240,6 +240,11 @@ def detect_language(text_to_detect: str):
 
 
 async def get_lines_at_stop(stop_number: str):
+    """
+    Get all the lines passing through this specific stop
+    :param stop_number:  stop number
+    :return: returns all the lines passing through this stop number
+    """
     try:
 
         # Load GTFS files

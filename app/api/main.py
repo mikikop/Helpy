@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 import httpx
 from app.ai.chat_ai_call_wa import chat_with_ai
-from app.utils.messaging import send_whatsapp_message
+from app.utils.messaging import send_whatsapp_message, send_whatsapp_response
 
 app = FastAPI()
 
@@ -44,12 +44,12 @@ async def whatsapp_webhook(request: Request):
                         conversation_history[user_id] = ai_response  # This includes the entire chat so far
                         # Send the response back to the user via WHAPI
                         async with httpx.AsyncClient() as client:
-                            if chat_type == "g.us":
-                                recipient_id = chat_id + "@g.us"
-                            else:
-                                recipient_id = user_id + "@s.whatsapp.net"
-                            await send_whatsapp_message(client, recipient_id, ai_response[-2]["content"])
-                            await send_whatsapp_message(client, recipient_id, ai_response[-1]["content"])
+                            recipient_id = (
+                                chat_id + "@g.us" if chat_type == "g.us"
+                                else user_id + "@s.whatsapp.net"
+                            )
+                            await send_whatsapp_response(client, recipient_id, ai_response)
+
                 if message_data.get("type", '') == "voice":
                     user_voice_message = message_data.get("voice", {}).get("link", "").strip()
 

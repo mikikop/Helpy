@@ -3,6 +3,7 @@ import csv
 import json
 import os
 from datetime import datetime
+from lib2to3.pgen2.tokenize import double3prog
 
 import aiohttp
 import fasttext
@@ -95,6 +96,9 @@ async def get_transit_times(stop_number: str, line_number: str, operator_id: str
         filtered_times = filter_json(times_response, stop_number, operator_id, line_number)
         lineRef = [x.get("LineRef") for x in filtered_times]
         etas = get_eta(filtered_times)
+        # sometimes several vehicles comes together or modifications happened
+        # so the set will remove the double, list will make a list and sorted will sort the list because set is unsorted
+        etas_no_double = sorted(list(set(etas)))
 
         return {
             "success": True,
@@ -102,7 +106,7 @@ async def get_transit_times(stop_number: str, line_number: str, operator_id: str
             "stop_number": stop_number,
             "line_number": line_number,
             "agency": operator_id,
-            "etas": etas
+            "etas": etas_no_double
         }
 
     except Exception as e:
@@ -161,7 +165,8 @@ def filter_json(resp_json: json, stop_code: str, agency: str, published_line: st
                 "ExpectedArrivalTime": monitored_call.get("ExpectedArrivalTime")
             }
             results.append(result)
-    print(results)
+
+    print("RES: ", results)
     return results
 
 

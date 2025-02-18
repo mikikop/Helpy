@@ -3,7 +3,6 @@ import csv
 import json
 import os
 from datetime import datetime
-from lib2to3.pgen2.tokenize import double3prog
 
 import aiohttp
 import fasttext

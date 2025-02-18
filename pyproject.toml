@@ -2,7 +2,7 @@
 name = "transp"
 version = "0.1.0"
 description = "[A FastAPI project AI based to create a voice and whatsapp agent in the transportation domain]"
-authors = ["mikikop <39693826+mikikop@users.noreply.github.com>"]
+authors = [""]
 license = "MIT"
 package-mode = false
 
